@@ -3,11 +3,11 @@
     <head>
         <meta charset="UTF-8">
         <title>Ederia - {% block title %}{% endblock %}</title>
+        <link rel="stylesheet" href="{{asset('assets/css/main.css')}}">
         <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 128 128%22><text y=%221.2em%22 font-size=%2296%22>⚫️</text></svg>">
         {# Run `composer require symfony/webpack-encore-bundle` to start using Symfony UX #}
         {% block stylesheets %}
             {{ encore_entry_link_tags('app') }}
-            <style>{% include 'css/main.css' %}</style>
         {% endblock %}
 
         {% block javascripts %}
@@ -16,19 +16,28 @@
     </head>
     <body>
         <header>
+            <a href="/"><h1>Ederia Shop</h1></a>
             <nav>
                 <a href="/">
                     <h1>Home</h1>
                 </a>
-                <a href="/account/signin">
-                    <h1>Sign in</h1>
-                </a>
-                <a href="/account/signup">
-                    <h1>Sign up</h1>
-                </a>
+                {% if is_granted('ROLE_USER') %}
+                    <a href="/logout">
+                        <h1>Sign out</h1>
+                    </a>
+                {% else %}
+                    <a href="/login">
+                        <h1>Sign in</h1>
+                    </a>
+                    <a href="/register">
+                        <h1>Sign up</h1>
+                    </a>
+                {% endif %}
             </nav>
         </header>
-        {% block body %}{% endblock %}
+        <section class="mainpage">
+            {% block body %}{% endblock %}
+        </section>
         <footer>
             <p>Footer</p>
         </footer>
