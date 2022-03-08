@@ -1,0 +1,11 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Hello CartController!{% endblock %}
+
+{% block body %}
+{% if app.session.get('cart') == null %}
+    <a href="{{ path('product_index') }}">Add products to your cart</a>
+{% else %}
+
+{% endif %}
+{% endblock %}

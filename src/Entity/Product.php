@@ -33,6 +33,11 @@ class Product
      */
     private $category;
 
+    /**
+     * @ORM\Column(type="string", length=200)
+     */
+    private $bannerImage;
+
     public function getId(): ?int
     {
         return $this->id;
@@ -62,14 +67,26 @@ class Product
         return $this;
     }
 
-    public function getCategory(): ?string
+    public function getCategory(): ?Category
     {
         return $this->category;
     }
 
-    public function setCategory(string $category): self
+    public function setCategory(Category $category): self
     {
         $this->category = $category;
+
+        return $this;
+    }
+
+    public function getBannerImage(): ?string
+    {
+        return $this->bannerImage;
+    }
+
+    public function setBannerImage(string $bannerImage): self
+    {
+        $this->bannerImage = $bannerImage;
 
         return $this;
     }

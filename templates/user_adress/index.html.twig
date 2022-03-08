@@ -1,0 +1,47 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}UserAdress index{% endblock %}
+
+{% block body %}
+    <h1>UserAdress index</h1>
+
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Id</th>
+                <th>Adress</th>
+                <th>Cp</th>
+                <th>City</th>
+                <th>Country</th>
+                <th>Name</th>
+                <th>FirstName</th>
+                <th>PhoneNumber</th>
+                <th>actions</th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for user_adress in user_adresses %}
+            <tr>
+                <td>{{ user_adress.id }}</td>
+                <td>{{ user_adress.adress }}</td>
+                <td>{{ user_adress.cp }}</td>
+                <td>{{ user_adress.city }}</td>
+                <td>{{ user_adress.country }}</td>
+                <td>{{ user_adress.name }}</td>
+                <td>{{ user_adress.firstName }}</td>
+                <td>{{ user_adress.phoneNumber }}</td>
+                <td>
+                    <a href="{{ path('user_adress_show', {'id': user_adress.id}) }}">show</a>
+                    <a href="{{ path('user_adress_edit', {'id': user_adress.id}) }}">edit</a>
+                </td>
+            </tr>
+        {% else %}
+            <tr>
+                <td colspan="9">no records found</td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+
+    <a href="{{ path('user_adress_new') }}">Create new</a>
+{% endblock %}

@@ -5,10 +5,18 @@
 {% block body %}
 <section class="products">
     <h2>Our products</h2>
-    <div class="category" style="background-image: url('{{asset('assets/img/GameCategory.png')}}')">
-        <h3>Category #1</h3>
-        <p>Some text...</p>
-        <button>Go to</button>
+    <div class="categories-container">
+        {% for category in categories %}
+            {% set categoryImg = "assets/img/" ~ category.img %}
+            <div class="category" style="background-image: url('{{asset(categoryImg)}}')">
+                <h3>{{category.name}}</h3>
+                <a href="{{ path('category_show', {'name' : category.name }) }}">See more</a>
+            </div>
+        {% else %}
+            <div class="category" style="background-color: #1B2631">
+                <h3>No category found</h3>
+            </div>
+        {% endfor %}
     </div>
 </section>
 {% endblock %}
