@@ -1,0 +1,4 @@
+<form method="post" action="{{ path('user_adress_select', {'id': user_adress.id, 'redirectRoute' : redirectRoute}) }}">
+    <input type="hidden" name="_token" value="{{ csrf_token('select' ~ user_adress.id) }}">
+    <button class="btn">Select</button>
+</form>

@@ -10,6 +10,9 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Security\Core\Security;
+use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
+use Symfony\Component\HttpFoundation\RequestStack;
 
 /**
  * @Route("/user/adress")
@@ -17,17 +20,34 @@ use Symfony\Component\Routing\Annotation\Route;
 class UserAdressController extends AbstractController
 {
     /**
-     * @Route("/", name="user_adress_index", methods={"GET"})
+     * @var Security
      */
-    public function index(UserAdressRepository $userAdressRepository): Response
+    private $security;
+    private $requestStack;
+
+    public function __construct(Security $security, RequestStack $requestStack)
     {
+        $this->requestStack = $requestStack;
+        $this->security = $security;
+    }
+
+    /**
+     * @Route("/", name="user_adress_index", methods={"GET"})
+     * @IsGranted("ROLE_USER")
+     */
+    public function index(UserAdressRepository $userAdressRepository, Request $request): Response
+    {
+        $redirectRoute = $request->query->get('redirectRoute');
+
         return $this->render('user_adress/index.html.twig', [
-            'user_adresses' => $userAdressRepository->findAll(),
+            'user_adresses' => $userAdressRepository->findBy(array('user' => $this->security->getUser())),
+            'redirectRoute' => $redirectRoute,
         ]);
     }
 
     /**
      * @Route("/new", name="user_adress_new", methods={"GET", "POST"})
+     * @IsGranted("ROLE_USER")
      */
     public function new(Request $request, EntityManagerInterface $entityManager): Response
     {
@@ -36,6 +56,7 @@ class UserAdressController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
+            $userAdress->setUser($this->security->getUser());
             $entityManager->persist($userAdress);
             $entityManager->flush();
 
@@ -50,23 +71,37 @@ class UserAdressController extends AbstractController
 
     /**
      * @Route("/{id}", name="user_adress_show", methods={"GET"})
+     * @IsGranted("ROLE_USER")
      */
-    public function show(UserAdress $userAdress): Response
+    public function show(UserAdress $userAdress, Request $request): Response
     {
+        $redirectRoute = $request->query->get('redirectRoute');
+
+        if ($userAdress->getUser() != $this->security->getUser()) {
+            return $this->redirectToRoute('user_adress_index');
+        }
+
         return $this->render('user_adress/show.html.twig', [
             'user_adress' => $userAdress,
+            'redirectRoute' => $redirectRoute,
         ]);
     }
 
     /**
      * @Route("/{id}/edit", name="user_adress_edit", methods={"GET", "POST"})
+     * @IsGranted("ROLE_USER")
      */
     public function edit(Request $request, UserAdress $userAdress, EntityManagerInterface $entityManager): Response
     {
+        if ($userAdress->getUser() != $this->security->getUser()) {
+            return $this->redirectToRoute('user_adress_index');
+        }
+
         $form = $this->createForm(UserAdressType::class, $userAdress);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
+            $userAdress->setUser($this->security->getUser());
             $entityManager->flush();
 
             return $this->redirectToRoute('user_adress_index', [], Response::HTTP_SEE_OTHER);
@@ -80,14 +115,37 @@ class UserAdressController extends AbstractController
 
     /**
      * @Route("/{id}", name="user_adress_delete", methods={"POST"})
+     * @IsGranted("ROLE_USER")
      */
     public function delete(Request $request, UserAdress $userAdress, EntityManagerInterface $entityManager): Response
     {
+        if ($userAdress->getUser() != $this->security->getUser()) {
+            return $this->redirectToRoute('user_adress_index');
+        }
+
         if ($this->isCsrfTokenValid('delete'.$userAdress->getId(), $request->request->get('_token'))) {
             $entityManager->remove($userAdress);
             $entityManager->flush();
         }
 
         return $this->redirectToRoute('user_adress_index', [], Response::HTTP_SEE_OTHER);
+    }
+
+    /**
+     * @Route("/select/{id}", name="user_adress_select", methods={"POST"})
+     * @IsGranted("ROLE_USER")
+     */
+    public function select(UserAdress $userAdress, Request $request): Response
+    {
+        $redirectRoute = $request->query->get('redirectRoute');
+        $session = $this->requestStack->getSession();
+        $session->set('address', $userAdress);
+
+        if ($redirectRoute != "")
+        {
+            return $this->redirectToRoute($redirectRoute);
+        }
+
+        return $this->redirectToRoute('user_adress_index');
     }
 }

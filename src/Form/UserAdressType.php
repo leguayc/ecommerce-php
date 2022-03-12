@@ -19,7 +19,6 @@ class UserAdressType extends AbstractType
             ->add('name')
             ->add('firstName')
             ->add('phoneNumber')
-            ->add('user')
         ;
     }
 

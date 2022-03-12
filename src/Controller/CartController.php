@@ -135,11 +135,10 @@ class CartController extends AbstractController
         // Do not use this, go to order controller
         $session = $this->requestStack->getSession();
 
-        $cart = $session->get('cart');
-
-
-        $session->remove('cart');
+        if ($session->get('address') != null) {
+            return $this->redirectToRoute('order_new');
+        }
         
-        return $this->redirectToRoute('cart');
+        return $this->redirectToRoute('user_adress_index', [ 'redirectRoute' => 'order_new' ]);
     }
 }
