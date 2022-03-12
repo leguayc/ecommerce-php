@@ -79,7 +79,7 @@ class Category
         if ($this->products->removeElement($product)) {
             // set the owning side to null (unless already changed)
             if ($product->getCategory() === $this) {
-                $product->setCategory(null);
+                //$product->setCategory(null);
             }
         }
 
@@ -96,5 +96,10 @@ class Category
         $this->img = $img;
 
         return $this;
+    }
+
+    public function __toString(): string
+    {
+        return $this->name;
     }
 }

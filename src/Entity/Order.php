@@ -3,6 +3,8 @@
 namespace App\Entity;
 
 use App\Repository\OrderRepository;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
@@ -39,6 +41,16 @@ class Order
      * @ORM\JoinColumn(nullable=false)
      */
     private $userAdress;
+
+    /**
+     * @ORM\OneToMany(targetEntity=OrderLine::class, mappedBy="orderCmd")
+     */
+    private $orderLines;
+
+    public function __construct()
+    {
+        $this->orderLines = new ArrayCollection();
+    }
 
     public function getId(): ?int
     {
@@ -89,6 +101,36 @@ class Order
     public function setUserAdress(?UserAdress $userAdress): self
     {
         $this->userAdress = $userAdress;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection|OrderLine[]
+     */
+    public function getOrderLines(): Collection
+    {
+        return $this->orderLines;
+    }
+
+    public function addOrderLine(OrderLine $orderLine): self
+    {
+        if (!$this->orderLines->contains($orderLine)) {
+            $this->orderLines[] = $orderLine;
+            $orderLine->setOrderCmd($this);
+        }
+
+        return $this;
+    }
+
+    public function removeOrderLine(OrderLine $orderLine): self
+    {
+        if ($this->orderLines->removeElement($orderLine)) {
+            // set the owning side to null (unless already changed)
+            if ($orderLine->getOrderCmd() === $this) {
+                $orderLine->setOrderCmd(null);
+            }
+        }
 
         return $this;
     }

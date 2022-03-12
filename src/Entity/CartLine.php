@@ -9,7 +9,6 @@ class CartLine
 
     public function __construct(Product $product)
     {
-        print("TEST");
         $this->product = $product;
         $this->quantity = 1;
     }
@@ -26,8 +25,12 @@ class CartLine
         return $this->quantity;
     }
 
-    public function setQuantity(Quantity $quantity) {
+    public function setQuantity(int $quantity) {
         $this->quantity = $quantity;
+    }
+
+    public function addQuantity(int $quantity) {
+        $this->quantity += $quantity;
     }
 
     public function getPrice(): int {

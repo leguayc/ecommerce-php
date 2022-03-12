@@ -12,6 +12,7 @@
 
         {% block javascripts %}
             {{ encore_entry_script_tags('app') }}
+            <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
         {% endblock %}
     </head>
     <body>
@@ -27,7 +28,7 @@
                     </a>
                 {% endif %}
 
-                {% if is_granted('ROLE_USER') %}
+                {% if is_granted('ROLE_ADMIN') %}
                     <a href="/admin">
                         <h1>Admin</h1>
                     </a>

@@ -7,19 +7,17 @@ use Doctrine\Common\Collections\Collection;
 
 class Cart
 {
-    private $totalPrice;
     private $cartLines;
 
     public function __construct()
     {
-        $this->cartLines = new Collection([]);
-        $this->totalPrice = 0;
+        $this->cartLines = array();
     }
 
     /**
-     * @return Collection|CartLine[]
+     * @return CartLine[]
      */
-    public function getCartLines(): Collection
+    public function getCartLines(): iterable
     {
         return $this->cartLines;
     }
@@ -30,9 +28,8 @@ class Cart
         if ($index == -1) {
             $cartLine = new CartLine($product);
             $this->cartLines[] = $cartLine;
-            $this->addTotalPrice($cartLine->getPrice());
         } else {
-            $this->cartLines[$index]->quantity += 1;
+            $this->cartLines[$index]->addQuantity(1);
         }
         
         return $this;
@@ -49,20 +46,37 @@ class Cart
         return -1;
     }
 
-    public function removeCartLine(CartLine $cartLine): self
+    public function setCartLineQuantity(Product $product, int $quantity): self
     {
-        if ($this->cartLines->removeElement($cartLine)) {
-            $this->addTotalPrice(-$cartLine.getPrice());
+        $index = $this->getCartIndexOfProduct($product);
+        if ($index != -1) {
+            $this->cartLines[$index]->setQuantity($quantity);
+
+            if ($this->cartLines[$index]->getQuantity() <= 0) {
+                $this->removeCartLineOfProduct($product);
+            }
+        }
+
+        return $this;
+    }
+
+    public function removeCartLineOfProduct(Product $product): self
+    {
+        $index = $this->getCartIndexOfProduct($product);
+        if ($index != -1) {
+            unset($this->cartLines[$index]);
         }
 
         return $this;
     }
 
     public function getTotalPrice(): int {
-        return $this->totalPrice;
-    }
+        $totalPrice = 0;
 
-    public function addTotalPrice(int $price) {
-        $this->totalPrice += $price;
+        foreach ($this->cartLines as $cartLine) {
+            $totalPrice = $cartLine->getPrice();
+        }
+
+        return $totalPrice;
     }
 }

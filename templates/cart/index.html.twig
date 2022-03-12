@@ -3,9 +3,90 @@
 {% block title %}Hello CartController!{% endblock %}
 
 {% block body %}
-{% if app.session.get('cart') == null %}
+{% if app.session.get('cart') == null or cartLines == null %}
     <a href="{{ path('product_index') }}">Add products to your cart</a>
 {% else %}
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Product</th>
+                <th>Product Price</th>
+                <th>Quantity</th>
+                <th>Total Price</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for cartLine in cartLines %}
+                <tr class="cartItem" id="cartItem_{{ cartLine.product.id }}">
+                    <td><a href="{{ path('product_show', {'id': cartLine.product.id}) }}">{{ cartLine.product.name }}</a></td>
+                    <td>${{ cartLine.product.price }}</td>
+                    <td><input type="number" id="cartItem_quantity_{{ cartLine.product.id }}" onchange="changeQuantity({{ cartLine.product.id }})" min="1" max="100" value="{{ cartLine.quantity }}"></td>
+                    <td>${{ cartLine.getPrice() }}</td>
+                    <td>
+                        <button onclick="remove({{ cartLine.product.id }})">Remove</button>
+                    </td>
+                </tr>
+            {% else %}
+                <tr>
+                    <td colspan="5">no records found</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
 
+    <h3>Total Price : $<span id="totalprice">{{ cartPrice }}</span></h3>
+    <p><a id="orderbtn" href="{{ path('cart_order') }}">Order</a></p>
+    <p><a href="{{ path('cart_empty') }}">Empty your cart</a></p>
 {% endif %}
+{% endblock %}
+
+{% block scripts %}
+    <script>
+        function changeQuantity(productId) {
+            let input = document.getElementById("cartItem_quantity_" + productId);
+            
+
+
+            var sentData = {productId : productId, quantity : input.value };
+
+            $.ajax({
+                url: "{{ path('cart_quantity') }}",
+                type: 'GET',
+                data: sentData,
+                dataType: 'json',
+                async: true,
+                
+                success: function(data, status) {
+                    document.getElementById("totalprice").innerText = data;
+                },
+                error : function(xhr, textStatus, errorThrown) {
+                    alert('Request failed.');  
+                }
+            });
+        }
+
+        function remove(productId) {
+            var sentData = {productId : productId };
+
+            $.ajax({
+                url: "{{ path('cart_remove') }}",
+                type: 'GET',
+                data: sentData,
+                async: true,
+                success: function(data, status) {
+                    let element = document.getElementById("cartItem_" + productId);
+                    let parentElement = element.parentNode;
+                    
+                    parentElement.removeChild(element);
+
+                    if (parentElement.children.length == 0) {
+                        location.reload();
+                    }
+
+                    document.getElementById("totalprice").innerText = data;
+                }
+            });
+        }
+    </script>
 {% endblock %}

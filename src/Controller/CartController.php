@@ -7,6 +7,8 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\RedirectResponse;
+use Symfony\Component\HttpFoundation\JsonResponse;
 
 use App\Entity\Product;
 use App\Entity\Cart;
@@ -26,19 +28,30 @@ class CartController extends AbstractController
      */
     public function index(): Response
     {
+        $session = $this->requestStack->getSession();
+
+        $cart = $session->get('cart');
+
+        if ($cart != null && !empty($cart->getCartLines())) {
+            return $this->render('cart/index.html.twig', [
+                'cartLines' => $cart->getCartLines(),
+                'cartPrice' => $cart->getTotalPrice(),
+            ]);
+        }
+        
         return $this->render('cart/index.html.twig', [
-            'controller_name' => 'CartController',
+            'cartLines' => null,
+            'cartPrice' => 0,
         ]);
     }
 
     /**
      * @Route("/cart/add", name="cart_add")
      */
-    public function add(Request $request, ProductRepository $productRepository): Response
+    public function add(Request $request, ProductRepository $productRepository): RedirectResponse
     {
         $session = $this->requestStack->getSession();
 
-        // stores an attribute in the session for later reuse
         $cart = $session->get('cart');
 
         if ($cart == null) {
@@ -51,8 +64,82 @@ class CartController extends AbstractController
 
         $session->set('cart', $cart);
         
-        return $this->render('cart/index.html.twig', [
-            'controller_name' => 'CartController',
-        ]);
+        return $this->redirectToRoute('cart');
+    }
+
+    /**
+     * @Route("/cart/setquantity", name="cart_quantity")
+     */
+    public function setQuantity(Request $request, ProductRepository $productRepository)
+    {
+        $session = $this->requestStack->getSession();
+
+        $cart = $session->get('cart');
+
+        if ($cart == null) {
+            return $this->redirectToRoute('cart');
+        }
+
+        $productId = $request->query->get('productId');
+        $product = $productRepository->find($productId);
+        $cart->setCartLineQuantity($product, $request->query->get('quantity'));
+
+        $jsonData = $cart->getTotalPrice();
+
+        $session->set('cart', $cart);
+
+        return new JsonResponse($jsonData);
+    }
+
+    /**
+     * @Route("/cart/remove", name="cart_remove")
+     */
+    public function remove(Request $request, ProductRepository $productRepository)
+    {
+        $session = $this->requestStack->getSession();
+
+        $cart = $session->get('cart');
+
+        if ($cart == null) {
+            return $this->redirectToRoute('cart');
+        }
+
+        $productId = $request->query->get('productId');
+        $product = $productRepository->find($productId);
+        $cart->removeCartLineOfProduct($product);
+
+        $jsonData = $cart->getTotalPrice();
+
+        $session->set('cart', $cart);
+
+        return new JsonResponse($jsonData);
+    }
+
+    /**
+     * @Route("/cart/empty", name="cart_empty")
+     */
+    public function empty(): RedirectResponse
+    {
+        $session = $this->requestStack->getSession();
+
+        $session->remove('cart');
+        
+        return $this->redirectToRoute('cart');
+    }
+
+    /**
+     * @Route("/cart/order", name="cart_order")
+     */
+    public function order(): RedirectResponse
+    {
+        // Do not use this, go to order controller
+        $session = $this->requestStack->getSession();
+
+        $cart = $session->get('cart');
+
+
+        $session->remove('cart');
+        
+        return $this->redirectToRoute('cart');
     }
 }
