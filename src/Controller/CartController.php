@@ -82,9 +82,10 @@ class CartController extends AbstractController
 
         $productId = $request->query->get('productId');
         $product = $productRepository->find($productId);
-        $cart->setCartLineQuantity($product, $request->query->get('quantity'));
+        $jsonData = array();
+        $jsonData[] = $cart->setCartLineQuantity($product, $request->query->get('quantity'));
 
-        $jsonData = $cart->getTotalPrice();
+        $jsonData[] = $cart->getTotalPrice();
 
         $session->set('cart', $cart);
 
@@ -125,20 +126,5 @@ class CartController extends AbstractController
         $session->remove('cart');
         
         return $this->redirectToRoute('cart');
-    }
-
-    /**
-     * @Route("/cart/order", name="cart_order")
-     */
-    public function order(): RedirectResponse
-    {
-        // Do not use this, go to order controller
-        $session = $this->requestStack->getSession();
-
-        if ($session->get('address') != null) {
-            return $this->redirectToRoute('order_new');
-        }
-        
-        return $this->redirectToRoute('user_adress_index', [ 'redirectRoute' => 'order_new' ]);
     }
 }

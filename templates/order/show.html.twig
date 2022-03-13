@@ -19,8 +19,19 @@
                 <th>DateTime</th>
                 <td>{{ order.dateTime ? order.dateTime|date('Y-m-d H:i:s') : '' }}</td>
             </tr>
+            <tr>
+                <th>TotalPrice</th>
+                <td>${{ order.TotalPrice }}</td>
+            </tr>
         </tbody>
     </table>
+
+    <h4>Products ordered :</h4>
+    <ul>
+        {% for orderLine in order.orderLines %}
+            <li>{{orderLine.product.name}} (x {{ orderLine.quantity }})</li>
+        {% endfor %}
+    </ul>
 
     <a href="{{ path('order_index') }}">back to list</a>
     

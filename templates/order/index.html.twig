@@ -11,6 +11,7 @@
                 <th>Id</th>
                 <th>Valid</th>
                 <th>DateTime</th>
+                <th>Price</th>
                 <th>actions</th>
             </tr>
         </thead>
@@ -20,6 +21,7 @@
                 <td>{{ order.id }}</td>
                 <td>{{ order.valid ? 'Yes' : 'No' }}</td>
                 <td>{{ order.dateTime ? order.dateTime|date('Y-m-d H:i:s') : '' }}</td>
+                <td>${{ order.totalPrice }}</td>
                 <td>
                     <a href="{{ path('order_show', {'id': order.id}) }}">show</a>
                 </td>
@@ -31,6 +33,4 @@
         {% endfor %}
         </tbody>
     </table>
-
-    <a href="{{ path('order_new') }}">Create new</a>
 {% endblock %}

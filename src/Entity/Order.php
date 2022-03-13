@@ -47,6 +47,11 @@ class Order
      */
     private $orderLines;
 
+    /**
+     * @ORM\Column(type="integer")
+     */
+    private $totalPrice;
+
     public function __construct()
     {
         $this->orderLines = new ArrayCollection();
@@ -131,6 +136,18 @@ class Order
                 $orderLine->setOrderCmd(null);
             }
         }
+
+        return $this;
+    }
+
+    public function getTotalPrice(): ?int
+    {
+        return $this->totalPrice;
+    }
+
+    public function setTotalPrice(int $totalPrice): self
+    {
+        $this->totalPrice = $totalPrice;
 
         return $this;
     }

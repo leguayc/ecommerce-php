@@ -5,6 +5,7 @@ namespace App\Controller;
 use App\Entity\Order;
 use App\Entity\OrderLine;
 use App\Form\OrderType;
+use App\Repository\OrderLineRepository;
 use App\Repository\OrderRepository;
 use App\Repository\ProductRepository;
 use App\Repository\UserAdressRepository;
@@ -53,41 +54,57 @@ class OrderController extends AbstractController
 
     #[Route('/new', name: 'order_new', methods: ['GET', 'POST'])]
     #[IsGranted("ROLE_USER")]
-    public function new(EntityManagerInterface $entityManager, UserAdressRepository $userAdressRepository, UserRepository $userRepository, ProductRepository $productRepository): Response
+    public function new(Request $request, EntityManagerInterface $entityManager, UserAdressRepository $userAdressRepository, UserRepository $userRepository, ProductRepository $productRepository): Response
     {
         $session = $this->requestStack->getSession();
 
         $cart = $session->get('cart');
-        $userAdress = $session->get('address');
 
-        if ($cart == null || $userAdress == null) {
+        if ($cart == null) {
             return $this->redirectToRoute('homepage');
         }
 
         $order = new Order();
-        $order->setUser($userRepository->find($this->security->getUser()));
-        $order->setDateTime(new \DateTime());
-        $order->setValid(true);
-        $order->setUserAdress($userAdressRepository->find($userAdress));
+        $form = $this->createForm(OrderType::class, $order);
+        $form->handleRequest($request);
 
-        $entityManager->persist($order);
-        $entityManager->flush();
-        
-        foreach ($cart->getCartLines() as $cartLine) {
-            $orderLine = new OrderLine();
-            $orderLine->setOrderCmd($order);
-            $orderLine->setProduct($productRepository->find($cartLine->getProduct()));
-            $orderLine->setQuantity($cartLine->getQuantity());
+        if ($form->isSubmitted() && $form->isValid()) {
+            $order->setUser($userRepository->find($this->security->getUser()));
+            $order->setDateTime(new \DateTime());
+            $order->setValid(true);
+            $order->setTotalPrice($cart->getTotalPrice());
 
-            $entityManager->persist($orderLine);
+            if ($order->getUserAdress() == null) {
+                return $this->renderForm('order/new.html.twig', [
+                    'order' => $order,
+                    'form' => $form,
+                ]);
+            }
+
+            $entityManager->persist($order);
+            $entityManager->flush();
+            
+            foreach ($cart->getCartLines() as $cartLine) {
+                $orderLine = new OrderLine();
+                $orderLine->setOrderCmd($order);
+                $orderLine->setProduct($productRepository->find($cartLine->getProduct()));
+                $orderLine->setQuantity($cartLine->getQuantity());
+
+                $entityManager->persist($orderLine);
+            }
+
+            $session->remove('cart');
+            $session->remove('address');
+
+            $entityManager->flush();
+
+            return $this->redirectToRoute('order_index');
         }
 
-        $session->remove('cart');
-        $session->remove('address');
-
-        $entityManager->flush();
-
-        return $this->redirectToRoute('order_index');
+        return $this->renderForm('order/new.html.twig', [
+            'order' => $order,
+            'form' => $form,
+        ]);
     }
 
     #[Route('/{id}', name: 'order_show', methods: ['GET'])]

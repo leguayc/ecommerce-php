@@ -37,11 +37,8 @@ class UserAdressController extends AbstractController
      */
     public function index(UserAdressRepository $userAdressRepository, Request $request): Response
     {
-        $redirectRoute = $request->query->get('redirectRoute');
-
         return $this->render('user_adress/index.html.twig', [
             'user_adresses' => $userAdressRepository->findBy(array('user' => $this->security->getUser())),
-            'redirectRoute' => $redirectRoute,
         ]);
     }
 
@@ -60,6 +57,12 @@ class UserAdressController extends AbstractController
             $entityManager->persist($userAdress);
             $entityManager->flush();
 
+            $redirectRoute = $request->query->get('redirectRoute');
+
+            if ($redirectRoute != null && $redirectRoute != "") {
+                return $this->redirectToRoute($redirectRoute);
+            }
+
             return $this->redirectToRoute('user_adress_index', [], Response::HTTP_SEE_OTHER);
         }
 
@@ -75,15 +78,12 @@ class UserAdressController extends AbstractController
      */
     public function show(UserAdress $userAdress, Request $request): Response
     {
-        $redirectRoute = $request->query->get('redirectRoute');
-
         if ($userAdress->getUser() != $this->security->getUser()) {
             return $this->redirectToRoute('user_adress_index');
         }
 
         return $this->render('user_adress/show.html.twig', [
             'user_adress' => $userAdress,
-            'redirectRoute' => $redirectRoute,
         ]);
     }
 
@@ -111,41 +111,5 @@ class UserAdressController extends AbstractController
             'user_adress' => $userAdress,
             'form' => $form,
         ]);
-    }
-
-    /**
-     * @Route("/{id}", name="user_adress_delete", methods={"POST"})
-     * @IsGranted("ROLE_USER")
-     */
-    public function delete(Request $request, UserAdress $userAdress, EntityManagerInterface $entityManager): Response
-    {
-        if ($userAdress->getUser() != $this->security->getUser()) {
-            return $this->redirectToRoute('user_adress_index');
-        }
-
-        if ($this->isCsrfTokenValid('delete'.$userAdress->getId(), $request->request->get('_token'))) {
-            $entityManager->remove($userAdress);
-            $entityManager->flush();
-        }
-
-        return $this->redirectToRoute('user_adress_index', [], Response::HTTP_SEE_OTHER);
-    }
-
-    /**
-     * @Route("/select/{id}", name="user_adress_select", methods={"POST"})
-     * @IsGranted("ROLE_USER")
-     */
-    public function select(UserAdress $userAdress, Request $request): Response
-    {
-        $redirectRoute = $request->query->get('redirectRoute');
-        $session = $this->requestStack->getSession();
-        $session->set('address', $userAdress);
-
-        if ($redirectRoute != "")
-        {
-            return $this->redirectToRoute($redirectRoute);
-        }
-
-        return $this->redirectToRoute('user_adress_index');
     }
 }

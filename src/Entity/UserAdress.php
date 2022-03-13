@@ -199,4 +199,9 @@ class UserAdress
 
         return $this;
     }
+
+    public function __toString(): string
+    {
+        return $this->adress . ", " . $this->cp . " " . $this->country;
+    }
 }

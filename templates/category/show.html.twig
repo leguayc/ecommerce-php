@@ -3,15 +3,22 @@
 {% block title %}Category{% endblock %}
 
 {% block body %}
-    {% set categoryImg = "assets/img/" ~ category.img %}
-    <div class="categoryBanner" style="background-image: url('{{asset(categoryImg)}}')">
+    <div class="categoryBanner" style="background-image: url('{{category.img}}')">
         <h2>{{ category.name }}</h2>
     </div>
 
     {% for product in category.products %}
-        <div>
-            <h3>{{ product.name }}</h3>
-            <a href="{{ path('product_show', {'id': product.id}) }}">See more</a>
+        <div class="categoryProduct">
+            <div class="productImage" style="background-image: url('{{product.bannerImage}}')"></div>
+            <div>
+                <h3>{{ product.name }}</h3>
+                <p>Price : ${{ product.price }}</p>
+                <a href="{{ path('product_show', {'id': product.id}) }}">See more</a>
+                <form method="GET" action="/cart/add" id="addToCartForm">
+                    <input type="hidden" name="productId" value="{{ product.id }}"/>
+                    <button type="submit">Add to cart</button>
+                </form>
+            </div>
         </div>
     {% endfor %}
 

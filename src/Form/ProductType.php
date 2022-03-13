@@ -14,7 +14,7 @@ class ProductType extends AbstractType
         $builder
             ->add('name')
             ->add('price')
-            ->add('bannerImage')
+            ->add('bannerImage', null, array('label' => 'Image Url'))
             ->add('category')
         ;
     }

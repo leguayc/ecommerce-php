@@ -46,7 +46,7 @@ class Cart
         return -1;
     }
 
-    public function setCartLineQuantity(Product $product, int $quantity): self
+    public function setCartLineQuantity(Product $product, int $quantity): int
     {
         $index = $this->getCartIndexOfProduct($product);
         if ($index != -1) {
@@ -55,9 +55,11 @@ class Cart
             if ($this->cartLines[$index]->getQuantity() <= 0) {
                 $this->removeCartLineOfProduct($product);
             }
+
+            return $this->cartLines[$index]->getPrice();
         }
 
-        return $this;
+        return 0;
     }
 
     public function removeCartLineOfProduct(Product $product): self
@@ -74,7 +76,7 @@ class Cart
         $totalPrice = 0;
 
         foreach ($this->cartLines as $cartLine) {
-            $totalPrice = $cartLine->getPrice();
+            $totalPrice += $cartLine->getPrice();
         }
 
         return $totalPrice;

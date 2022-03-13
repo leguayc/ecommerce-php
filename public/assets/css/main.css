@@ -83,3 +83,19 @@ section.products .category, .categoryBanner {
     color: white;
     text-shadow: 0 2px 2px black;
 }
+
+.categoryProduct {
+    width: 70%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.productImage {
+    background-repeat: no-repeat;
+    background-size: cover;
+    background-position: center;
+    background-attachment: scroll;
+    height: 25vh;
+    width: 50%;
+}
