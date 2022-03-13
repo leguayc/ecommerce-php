@@ -6,6 +6,7 @@ use App\Repository\UserAdressRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Validator\Constraints as Assert;
 
 /**
  * @ORM\Entity(repositoryClass=UserAdressRepository::class)
@@ -51,6 +52,8 @@ class UserAdress
 
     /**
      * @ORM\Column(type="string", length=15)
+     * @Assert\Length(min = 8, max = 20, minMessage = "min_lenght", maxMessage = "max_lenght")
+     * @Assert\Regex(pattern="/^\(0\)[0-9]*$/", message="number_only") 
      */
     private $phoneNumber;
 
